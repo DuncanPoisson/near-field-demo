@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Near-Field IR Imaging — Interactive Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <h1>Near-Field IR Imaging</h1>
+      <p class="subtitle">How a nanoscale tip breaks the diffraction limit — and what IR spectra reveal about living tissue</p>
+    </div>
+  </header>
+
+  <!-- ===== CHAPTER 1 ===== -->
+  <section id="chapter1" class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-num">Chapter 1</span>
+      <h2>Breaking the Diffraction Limit</h2>
+    </div>
+
+    <div class="panel-row">
+      <div class="viz-panel">
+        <div class="panel-label">True Sample</div>
+        <canvas id="trueCanvas" aria-label="True sample: five sharp gold nanorods on dark background"></canvas>
+      </div>
+      <div class="viz-panel">
+        <div class="panel-label">What the Detector Sees</div>
+        <canvas id="perceivedCanvas" aria-label="Detector view: nanorods blurred by the tip point-spread function"></canvas>
+      </div>
+    </div>
+
+    <div class="tip-viz">
+      <svg id="tipSVG" viewBox="0 0 800 90" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="coneGrad" x1="0" y1="2" x2="0" y2="68" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#58a6ff" stop-opacity="0.04"/>
+            <stop offset="100%" stop-color="#58a6ff" stop-opacity="0.82"/>
+          </linearGradient>
+          <linearGradient id="tipBodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#c0c0c0"/>
+            <stop offset="100%" stop-color="#606060"/>
+          </linearGradient>
+        </defs>
+        <polygon id="tipCone"   fill="url(#coneGrad)"/>
+        <polygon id="tipBody"   fill="url(#tipBodyGrad)" stroke="#909090" stroke-width="0.5"/>
+        <line    id="surfaceLine" stroke="#58a6ff" stroke-width="1" stroke-opacity="0.35"/>
+        <g       id="surfaceRods"></g>
+        <circle  id="tipApex" r="3" fill="#58a6ff"/>
+      </svg>
+      <div class="wavelength-bar">
+        <span class="wavelength-pill">Simulated IR&nbsp;&lambda;&nbsp;= 10,000 nm (10&nbsp;&micro;m, mid-IR) — 500&times; larger than smallest resolvable tip</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label class="control-label" for="tipSlider">Tip Radius</label>
+        <div class="slider-row">
+          <input type="range" id="tipSlider" class="slider"
+                 min="5" max="2000" value="20"
+                 aria-label="Tip radius in nanometers">
+          <span class="readout" id="tipReadout">20 nm</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Estimated Resolution:</span>
+          <span class="metric-value" id="resolutionReadout">~24 nm</span>
+          <span class="regime-badge" id="regimeBadge">near-field</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <button class="info-btn" data-modal="rayleigh"        aria-label="Open Rayleigh Criterion explainer">ⓘ Rayleigh Criterion</button>
+      <button class="info-btn" data-modal="fieldConfinement" aria-label="Open Field Confinement explainer">ⓘ Field Confinement</button>
+      <button class="info-btn" data-modal="evanescent"      aria-label="Open Evanescent Fields explainer">ⓘ Evanescent Fields</button>
+      <div class="info-spacer"></div>
+      <button class="reset-btn" id="resetCh1">Reset</button>
+    </div>
+  </section>
+
+  <!-- ===== CHAPTER DIVIDER ===== -->
+  <div class="chapter-divider" aria-hidden="true">
+    <span class="chapter-divider-label">Chapter 2</span>
+  </div>
+
+  <!-- ===== CHAPTER 2 ===== -->
+  <section id="chapter2" class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-num">Chapter 2</span>
+      <h2>Reading the Tissue Window</h2>
+    </div>
+
+    <div class="panel-row">
+      <div class="viz-panel">
+        <div class="panel-label">Tissue Cross-Section</div>
+        <canvas id="tissueCanvas" aria-label="Tissue cross-section showing how deep light penetrates at the selected wavelength"></canvas>
+      </div>
+      <div class="viz-panel">
+        <div class="panel-label">Absorption Spectrum — drag the cursor</div>
+        <canvas id="spectrumCanvas" aria-label="Hemoglobin absorption spectrum with draggable wavelength cursor"></canvas>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label class="control-label" for="oxySlider">Oxygenation (% HbO&#8322;)</label>
+        <div class="slider-row">
+          <input type="range" id="oxySlider" class="slider"
+                 min="0" max="100" value="75"
+                 aria-label="Oxygenation percentage">
+          <span class="readout" id="oxyReadout">75%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <button class="info-btn" data-modal="nirWindow" aria-label="Open NIR Optical Window explainer">ⓘ NIR Optical Window</button>
+      <button class="info-btn" data-modal="hbSpectra" aria-label="Open HbO₂ vs Hb explainer">ⓘ HbO&#8322; vs Hb</button>
+      <button class="info-btn" data-modal="pulseOx"   aria-label="Open Pulse Oximetry explainer">ⓘ Pulse Oximetry</button>
+      <div class="info-spacer"></div>
+      <button class="secondary-btn" id="showDecoderBtn">Show Real Output</button>
+      <button class="reset-btn"     id="resetCh2">Reset</button>
+    </div>
+  </section>
+
+  <!-- ===== MODALS ===== -->
+  <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+    <div id="modalCard" class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button id="modalClose" class="modal-close" aria-label="Close dialog">&#10005;</button>
+      <h3 id="modalTitle" class="modal-title"></h3>
+      <div id="modalBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ===== DECODER PANEL ===== -->
+  <aside id="decoderPanel" class="decoder-panel" aria-label="Near-field output decoder" aria-hidden="true">
+    <div class="decoder-header">
+      <span class="decoder-title">Real Near-Field Output</span>
+      <button id="decoderClose" class="decoder-close" aria-label="Close decoder panel">&#10005;</button>
+    </div>
+    <div id="decoderStateLabel" class="decoder-state-label">Oxygenated tissue</div>
+    <canvas id="decoderImage"    width="240" height="120" aria-label="False-color s-SNOM amplitude image"></canvas>
+    <canvas id="decoderSpectrum" width="240" height="90"  aria-label="Annotated near-field spectrum"></canvas>
+    <div id="decoderCallouts" class="decoder-callouts"></div>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>
